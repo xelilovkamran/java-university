@@ -1,4 +1,4 @@
-public class FoodItem {
+class FoodItem {
     private String name;
     private double price;
 

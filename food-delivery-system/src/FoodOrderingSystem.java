@@ -1,7 +1,23 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
-// TODO: ADD METHOD TO RECHARGE BALANCE
-// TODO: ADD METHOD TO VIEW ORDER HISTORY
+
+class Order {
+    private List<FoodItem> items;
+
+    public Order() {
+        items = new ArrayList<>();
+    }
+
+    public void addItem(FoodItem item) {
+        items.add(item);
+    }
+
+    public List<FoodItem> getItems() {
+        return items;
+    }
+}
 
 class FoodOrderingSystem {
     private static final int MAX_ITEMS = 100;
@@ -10,6 +26,7 @@ class FoodOrderingSystem {
     private FoodItem[] cart;
     private int cartSize;
     private double balance;
+    private List<Order> orderHistory;
 
     public FoodOrderingSystem() {
         menu = new FoodItem[MAX_ITEMS];
@@ -17,6 +34,7 @@ class FoodOrderingSystem {
         cart = new FoodItem[MAX_ITEMS];
         cartSize = 0;
         balance = 100.0; // Initial balance
+        orderHistory = new ArrayList<>();
     }
 
     public void addItemToMenu(String name, double price) {
@@ -72,7 +90,17 @@ class FoodOrderingSystem {
         System.out.println("Your balance: $" + balance);
     }
 
+    public void rechargeBalance(double amount) {
+        balance += amount;
+        System.out.println("Balance recharged successfully. Your new balance is: $" + balance);
+    }
+
     public void placeOrder() {
+        if (cartSize == 0) {
+            System.out.println("Your cart is empty. Add items to cart before placing an order.");
+            return;
+        }
+
         double total = 0;
         for (int i = 0; i < cartSize; i++) {
             total += cart[i].getPrice();
@@ -81,9 +109,26 @@ class FoodOrderingSystem {
             System.out.println("Insufficient balance. Please remove some items from cart or recharge your balance.");
         } else {
             balance -= total;
+            Order order = new Order();
+            for (FoodItem item : cart) {
+                order.addItem(item);
+            }
+            orderHistory.add(order);
             System.out.println("Order placed successfully!");
             cart = new FoodItem[MAX_ITEMS]; // Empty the cart after placing order
             cartSize = 0;
+        }
+    }
+
+    public void viewOrderHistory() {
+        System.out.println("Order History:");
+        for (int i = 0; i < orderHistory.size(); i++) {
+            Order order = orderHistory.get(i);
+            List<FoodItem> items = order.getItems();
+            System.out.println("Order " + (i + 1) + ":");
+            for (FoodItem item : items) {
+                System.out.println("- " + item.getName() + " - $" + item.getPrice());
+            }
         }
     }
 
@@ -129,8 +174,10 @@ class FoodOrderingSystem {
             System.out.println("3. Remove Item from Cart");
             System.out.println("4. View Cart");
             System.out.println("5. Check Balance");
-            System.out.println("6. Place Order");
-            System.out.println("7. Back to User Type Selection");
+            System.out.println("6. Recharge Balance");
+            System.out.println("7. Place Order");
+            System.out.println("8. View Order History");
+            System.out.println("9. Back to User Type Selection");
             System.out.print("Enter your choice: ");
             choice = scanner.nextInt();
 
@@ -155,15 +202,23 @@ class FoodOrderingSystem {
                     system.checkBalance();
                     break;
                 case 6:
-                    system.placeOrder();
+                    System.out.print("Enter amount to recharge: $");
+                    double amount = scanner.nextDouble();
+                    system.rechargeBalance(amount);
                     break;
                 case 7:
+                    system.placeOrder();
+                    break;
+                case 8:
+                    system.viewOrderHistory();
+                    break;
+                case 9:
                     System.out.println("Returning to user type selection...");
                     break;
                 default:
-                    System.out.println("Invalid choice. Please enter a number between 1 and 7.");
+                    System.out.println("Invalid choice. Please enter a number between 1 and 9.");
             }
-        } while (choice != 7);
+        } while (choice != 9);
     }
 
     public static void managerActions(FoodOrderingSystem system, Scanner scanner) {
